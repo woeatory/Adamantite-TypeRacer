@@ -16,6 +16,7 @@ type TyperGame struct {
 	WordsCount    int
 	WordsComplete int
 	WPM           int
+	TyposCount    int
 }
 
 func (tg *TyperGame) initGame(text string) {
@@ -27,6 +28,7 @@ func (tg *TyperGame) HandleKey(pressed rune) (int, bool) {
 	var correct bool
 	if tg.currentRune != pressed {
 		tg.PlayerScore--
+		tg.TyposCount++
 		correct = false
 	} else {
 		tg.PlayerScore++
@@ -52,7 +54,7 @@ func (tg *TyperGame) HandleKey(pressed rune) (int, bool) {
 }
 
 func (tg *TyperGame) StartGame() error {
-	text, err := os.ReadFile("game/texts/text.txt")
+	text, err := os.ReadFile("internal/game/texts/text.txt")
 	if err != nil {
 		return err
 	}

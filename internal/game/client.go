@@ -38,32 +38,42 @@ func showText(
 	}
 }
 
-func showEndGame(s tcell.Screen, wpm int) {
+func showEndGame(s tcell.Screen, wpm, score, typosCount int) {
 	const (
 		hor  = '-'
 		vert = '|'
 	)
-	styleText := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+	deffaultStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+	accuracyInfoStyle := tcell.StyleDefault.Background(tcell.ColorGreen).Foreground(tcell.ColorWhite)
+	typosInfoStyle := tcell.StyleDefault.Background(tcell.ColorRed).Foreground(tcell.ColorWhite)
 	styleEsc := tcell.StyleDefault.Background(tcell.Color20).Foreground(tcell.ColorWhite)
 	// draw box
 	h := 10
 	w := 35
 	for i := 1; i < w; i++ {
-		s.SetContent(i, 0, hor, nil, styleText)
-		s.SetContent(i, h, hor, nil, styleText)
+		s.SetContent(i, 0, hor, nil, deffaultStyle)
+		s.SetContent(i, h, hor, nil, deffaultStyle)
 	}
 	for i := 0; i < h+1; i++ {
-		s.SetContent(0, i, vert, nil, styleText)
-		s.SetContent(w, i, vert, nil, styleText)
+		s.SetContent(0, i, vert, nil, deffaultStyle)
+		s.SetContent(w, i, vert, nil, deffaultStyle)
 	}
-	resultString := "Your word per minute is: " + strconv.Itoa(wpm)
 	offset := 2
+	resultString := "Your word per minute is: " + strconv.Itoa(wpm)
 	for i, char := range resultString {
-		s.SetContent(i+offset, 2, char, nil, styleText)
+		s.SetContent(i+offset, 2, char, nil, deffaultStyle)
+	}
+	correct := "Your accuracy is: " + strconv.Itoa(score)
+	for i, char := range correct {
+		s.SetContent(i+offset, 4, char, nil, accuracyInfoStyle)
+	}
+	typos := "You've done " + strconv.Itoa(typosCount) + " typos"
+	for i, char := range typos {
+		s.SetContent(i+offset, 5, char, nil, typosInfoStyle)
 	}
 	espString := "Press Esc to exit"
 	for i, char := range espString {
-		s.SetContent(i+offset, 4, char, nil, styleEsc)
+		s.SetContent(i+offset, 8, char, nil, styleEsc)
 	}
 }
 
@@ -116,7 +126,7 @@ func SoloTyper() {
 		s.Sync()
 		if tg.GameState == false {
 			s.Clear()
-			showEndGame(s, tg.WPM)
+			showEndGame(s, tg.WPM, tg.PlayerScore, tg.TyposCount)
 			s.Sync()
 			for {
 				ev := s.PollEvent()

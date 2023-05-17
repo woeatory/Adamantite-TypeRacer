@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/manifoldco/promptui"
-	"github.com/woeatory/Adamantite-TypeRacer/game"
+	"github.com/woeatory/Adamantite-TypeRacer/internal/game"
 )
 
 func main() {
