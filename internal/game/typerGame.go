@@ -8,15 +8,16 @@ import (
 const GAME_TIME = time.Second * 3
 
 type TyperGame struct {
-	Text          []rune
 	PlayerScore   int
+	WPM           int
+	TyposCount    int
+	PressCounter  int
+	Text          []rune
 	currentRune   rune
 	index         int
 	GameState     bool
 	WordsCount    int
 	WordsComplete int
-	WPM           int
-	TyposCount    int
 }
 
 func (tg *TyperGame) initGame(text string) {
@@ -26,6 +27,7 @@ func (tg *TyperGame) initGame(text string) {
 
 func (tg *TyperGame) HandleKey(pressed rune) (int, bool) {
 	var correct bool
+	tg.PressCounter++
 	if tg.currentRune != pressed {
 		tg.PlayerScore--
 		tg.TyposCount++

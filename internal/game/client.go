@@ -38,7 +38,7 @@ func showText(
 	}
 }
 
-func showEndGame(s tcell.Screen, wpm, score, typosCount int) {
+func showEndGame(s tcell.Screen, wpm, score, totalPress, typosCount int) {
 	const (
 		hor  = '-'
 		vert = '|'
@@ -63,12 +63,16 @@ func showEndGame(s tcell.Screen, wpm, score, typosCount int) {
 	for i, char := range resultString {
 		s.SetContent(i+offset, 2, char, nil, deffaultStyle)
 	}
-	correct := "Your accuracy is: " + strconv.Itoa(score)
-	for i, char := range correct {
+	accuracy := 100 * score / totalPress
+	if accuracy < 0 {
+		accuracy = 0
+	}
+	accuracyInfo := "Your accuracy is: " + strconv.Itoa(accuracy) + "%"
+	for i, char := range accuracyInfo {
 		s.SetContent(i+offset, 4, char, nil, accuracyInfoStyle)
 	}
-	typos := "You've done " + strconv.Itoa(typosCount) + " typos"
-	for i, char := range typos {
+	typosInfo := "You've done " + strconv.Itoa(typosCount) + " typos"
+	for i, char := range typosInfo {
 		s.SetContent(i+offset, 5, char, nil, typosInfoStyle)
 	}
 	espString := "Press Esc to exit"
@@ -126,7 +130,7 @@ func SoloTyper() {
 		s.Sync()
 		if tg.GameState == false {
 			s.Clear()
-			showEndGame(s, tg.WPM, tg.PlayerScore, tg.TyposCount)
+			showEndGame(s, tg.WPM, tg.PlayerScore, tg.PressCounter, tg.TyposCount)
 			s.Sync()
 			for {
 				ev := s.PollEvent()
