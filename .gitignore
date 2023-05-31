@@ -16,3 +16,9 @@
 
 # Log files
 *.log
+
+# Env files
+.env
+
+# IDE files
+.idea

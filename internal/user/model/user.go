@@ -1,7 +1,6 @@
 package model
 
 import (
-	"crypto"
 	"github.com/google/uuid"
 	"time"
 )
@@ -9,6 +8,6 @@ import (
 type User struct {
 	UserID       uuid.UUID
 	Username     string
-	PasswordHash crypto.Hash
+	PasswordHash string
 	CreatedAt    time.Time
 }

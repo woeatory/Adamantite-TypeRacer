@@ -1,10 +1,16 @@
 package server
 
 import (
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	authController "github.com/woeatory/Adamantite-TypeRacer/internal/auth/controller"
+
+	"github.com/woeatory/Adamantite-TypeRacer/middleware"
+
+	authContr "github.com/woeatory/Adamantite-TypeRacer/internal/auth/controller"
 	authServ "github.com/woeatory/Adamantite-TypeRacer/internal/auth/service"
-	userController "github.com/woeatory/Adamantite-TypeRacer/internal/user/controller"
+	"github.com/woeatory/Adamantite-TypeRacer/internal/repository"
+	userContr "github.com/woeatory/Adamantite-TypeRacer/internal/user/controller"
 	userServ "github.com/woeatory/Adamantite-TypeRacer/internal/user/service"
 	"io"
 	"log"
@@ -26,7 +32,6 @@ const (
 func SetUpAndBoot() {
 	// Disable Console Color, you don't need console color when writing the logs to file.
 	gin.DisableConsoleColor()
-
 	// Logging to a file.
 	f, _ := os.Create("gin.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -35,13 +40,19 @@ func SetUpAndBoot() {
 	// gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
 	// Set up Services
-	userService := userServ.NewUserService()
-	authService := authServ.NewAuthService()
+	repo := repository.NewRepo()
+	userService := userServ.NewUserService(repo)
+	authService := authServ.NewAuthService(repo)
 	// Set up Controllers
-	userController := userController.NewUserController(userService)
-	authController := authController.NewAuthController(authService)
+	userController := userContr.NewUserController(userService)
+	authController := authContr.NewAuthController(authService)
+
 	router := gin.Default()
+	store := cookie.NewStore([]byte("secret"))
+	router.Use(sessions.Sessions("mysession", store))
+
 	userGroup := router.Group(UserGroupPath)
+	userGroup.Use(middleware.Authentication())
 	{
 		userGroup.GET(UserGetAllPath, userController.GetAllUsers)
 	}
@@ -51,8 +62,4 @@ func SetUpAndBoot() {
 		authGroup.POST(AuthSignUp, authController.SignUp)
 	}
 	log.Fatal(http.ListenAndServe(ADDRESS, router))
-}
-
-func userTestHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "user test"})
 }
