@@ -6,9 +6,11 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS scores (
-    score_id SERIAL PRIMARY KEY,
+    record_id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
-    score INT NOT NULL,
+    WPM INT NOT NULL,
+    accuracy INT NOT NULL,
+    typos INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );

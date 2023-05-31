@@ -12,6 +12,9 @@ import (
 	"github.com/woeatory/Adamantite-TypeRacer/internal/repository"
 	userContr "github.com/woeatory/Adamantite-TypeRacer/internal/user/controller"
 	userServ "github.com/woeatory/Adamantite-TypeRacer/internal/user/service"
+	scoreContr "github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/controller"
+	scoreServ "github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/service"
+
 	"io"
 	"log"
 	"net/http"
@@ -22,14 +25,17 @@ const PORT = ":8080"
 const ADDRESS = "localhost" + PORT
 
 const (
-	UserGroupPath   = "user"
-	UserGetAllPath  = "/getAll"
-	UserGetByIdPath = "/:userID"
-	ChangeUserName  = "/changeUsername"
-	DeleteUser      = "/deleteUser"
-	AuthGroupPath   = "auth"
-	AuthLogin       = "/login"
-	AuthSignUp      = "/signup"
+	UserGroupPath     = "user"
+	UserGetAllPath    = "/getAll"
+	UserGetByIdPath   = "/:userID"
+	ChangeUserName    = "/changeUsername"
+	DeleteUser        = "/deleteUser"
+	AuthGroupPath     = "auth"
+	AuthLogin         = "/login"
+	AuthSignUp        = "/signup"
+	ScoreGroupPath    = "score"
+	NewScoreRecord    = "/newScoreRecord"
+	DeleteScoreRecord = "/deleteScoreRecord"
 )
 
 func SetUpAndBoot() {
@@ -46,9 +52,11 @@ func SetUpAndBoot() {
 	repo := repository.NewRepo()
 	userService := userServ.NewUserService(repo)
 	authService := authServ.NewAuthService(repo)
+	scoreService := scoreServ.NewScoreService(repo)
 	// Set up Controllers
 	userController := userContr.NewUserController(userService)
 	authController := authContr.NewAuthController(authService)
+	scoreController := scoreContr.NewScoreController(scoreService)
 
 	router := gin.Default()
 	store := cookie.NewStore([]byte("secret"))
@@ -66,6 +74,13 @@ func SetUpAndBoot() {
 	{
 		authGroup.POST(AuthLogin, authController.LogIn)
 		authGroup.POST(AuthSignUp, authController.SignUp)
+	}
+
+	scoreGroup := router.Group(ScoreGroupPath)
+	scoreGroup.Use(middleware.Authentication())
+	{
+		scoreGroup.POST(NewScoreRecord, scoreController.AddNewScore)
+		scoreGroup.DELETE(DeleteScoreRecord, scoreController.DeleteScoreRecord)
 	}
 	log.Fatal(http.ListenAndServe(ADDRESS, router))
 }
