@@ -30,14 +30,39 @@ func (userService *UserService) GetAll() ([]model.User, error) {
 	return users, nil
 }
 
-func (userService *UserService) GetByID() {
-
+func (userService *UserService) GetByID(userID string) (model.User, error) {
+	query := "SELECT user_id, username, created_at FROM users WHERE user_id = $1"
+	stmt, err := userService.repo.DB.Prepare(query)
+	if err != nil {
+		return model.User{}, err
+	}
+	var user model.User
+	err = stmt.QueryRow(userID).Scan(&user.UserID, &user.Username, &user.CreatedAt)
+	return user, nil
 }
 
-func (userService *UserService) ChangeUsername() {
-
+func (userService *UserService) ChangeUsername(newUsername, userID string) error {
+	query := "UPDATE users SET username = $1 WHERE user_id = $2"
+	stmt, err := userService.repo.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(newUsername, userID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (userService *UserService) DeleteUser() {
-
+func (userService *UserService) DeleteUser(userID string) error {
+	query := "DELETE FROM users WHERE user_id = $1"
+	stmt, err := userService.repo.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(userID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

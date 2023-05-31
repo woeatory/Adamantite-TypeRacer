@@ -22,11 +22,14 @@ const PORT = ":8080"
 const ADDRESS = "localhost" + PORT
 
 const (
-	UserGroupPath  = "user"
-	UserGetAllPath = "/getAll"
-	AuthGroupPath  = "auth"
-	AuthLogin      = "/login"
-	AuthSignUp     = "/signup"
+	UserGroupPath   = "user"
+	UserGetAllPath  = "/getAll"
+	UserGetByIdPath = "/:userID"
+	ChangeUserName  = "/changeUsername"
+	DeleteUser      = "/deleteUser"
+	AuthGroupPath   = "auth"
+	AuthLogin       = "/login"
+	AuthSignUp      = "/signup"
 )
 
 func SetUpAndBoot() {
@@ -55,6 +58,9 @@ func SetUpAndBoot() {
 	userGroup.Use(middleware.Authentication())
 	{
 		userGroup.GET(UserGetAllPath, userController.GetAllUsers)
+		userGroup.GET(UserGetByIdPath, userController.GetUserByID)
+		userGroup.PUT(ChangeUserName, userController.ChangeUsername)
+		userGroup.DELETE(DeleteUser, userController.DeleteUser)
 	}
 	authGroup := router.Group(AuthGroupPath)
 	{
