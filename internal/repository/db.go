@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"log"
@@ -19,36 +21,32 @@ func NewRepo() *Repo {
 		return nil
 	}
 	var (
+		driver   = os.Getenv("DB_DRIVER")
 		host     = os.Getenv("DB_HOST")
 		port     = os.Getenv("DB_PORT")
 		user     = os.Getenv("DB_USER")
 		password = os.Getenv("DB_PASSWORD")
 		dbname   = os.Getenv("DB_NAME")
 	)
-	psqlInfo := fmt.Sprintf(
-		"host=%s port=%s user=%s "+
-			"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname,
-	)
-	repoDB, err := sql.Open("postgres", psqlInfo)
+	driverURL := driver + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname + "?sslmode=disable"
+	db, err := sql.Open("postgres", driverURL)
 	if err != nil {
 		log.Println(err)
 	}
-	err = repoDB.Ping()
+
+	m, err := migrate.New("file://migrations", driverURL)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	query, err := os.ReadFile("sql/create_tables.sql")
-	if err != nil {
-		panic(err)
+	defer m.Close()
+
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		log.Fatal(err)
 	}
-	rows, err := repoDB.Query(string(query))
-	defer rows.Close()
-	if err != nil {
-		panic(err)
-	}
+
 	return &Repo{
-		DB: repoDB,
+		DB: db,
 	}
 }
 
