@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const GAME_TIME = time.Second * 3
+const GAME_TIME = time.Second * 60
 
 type TyperGame struct {
 	PlayerScore   int
