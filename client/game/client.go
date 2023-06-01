@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/woeatory/Adamantite-TypeRacer/client/handlers"
 	"log"
 	"strconv"
 )
@@ -43,25 +44,25 @@ func showEndGame(s tcell.Screen, wpm, score, totalPress, typosCount int) {
 		hor  = '-'
 		vert = '|'
 	)
-	deffaultStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+	defaultStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
 	accuracyInfoStyle := tcell.StyleDefault.Background(tcell.ColorGreen).Foreground(tcell.ColorWhite)
 	typosInfoStyle := tcell.StyleDefault.Background(tcell.ColorRed).Foreground(tcell.ColorWhite)
 	styleEsc := tcell.StyleDefault.Background(tcell.Color20).Foreground(tcell.ColorWhite)
 	// draw box
 	h := 10
-	w := 35
+	w := 40
 	for i := 1; i < w; i++ {
-		s.SetContent(i, 0, hor, nil, deffaultStyle)
-		s.SetContent(i, h, hor, nil, deffaultStyle)
+		s.SetContent(i, 0, hor, nil, defaultStyle)
+		s.SetContent(i, h, hor, nil, defaultStyle)
 	}
 	for i := 0; i < h+1; i++ {
-		s.SetContent(0, i, vert, nil, deffaultStyle)
-		s.SetContent(w, i, vert, nil, deffaultStyle)
+		s.SetContent(0, i, vert, nil, defaultStyle)
+		s.SetContent(w, i, vert, nil, defaultStyle)
 	}
 	offset := 2
 	resultString := "Your word per minute is: " + strconv.Itoa(wpm)
 	for i, char := range resultString {
-		s.SetContent(i+offset, 2, char, nil, deffaultStyle)
+		s.SetContent(i+offset, 2, char, nil, defaultStyle)
 	}
 	accuracy := 100 * score / totalPress
 	if accuracy < 0 {
@@ -75,9 +76,34 @@ func showEndGame(s tcell.Screen, wpm, score, totalPress, typosCount int) {
 	for i, char := range typosInfo {
 		s.SetContent(i+offset, 5, char, nil, typosInfoStyle)
 	}
+	saveInfo := "Press f7 to save result:"
+	for i, char := range saveInfo {
+		s.SetContent(i+offset, 7, char, nil, defaultStyle)
+	}
+	showStatus(s, false)
 	espString := "Press Esc to exit"
 	for i, char := range espString {
 		s.SetContent(i+offset, 8, char, nil, styleEsc)
+	}
+}
+
+func showStatus(s tcell.Screen, status bool) {
+	savedStyle := tcell.StyleDefault.Background(tcell.ColorGreen).Foreground(tcell.ColorWhite)
+	unsavedStyle := tcell.StyleDefault.Background(tcell.ColorRed).Foreground(tcell.ColorWhite)
+
+	currStyle := unsavedStyle
+
+	st := "Not Saved"
+	if status {
+		st = "Saved"
+		currStyle = savedStyle
+	}
+	// clear
+	for i := 27; i < 27+9; i++ {
+		s.SetContent(i, 7, ' ', nil, defStyle)
+	}
+	for i, char := range st {
+		s.SetContent(i+2+25, 7, char, nil, currStyle)
 	}
 }
 
@@ -123,6 +149,10 @@ func SoloTyper() {
 
 	tg := TyperGame{}
 	err = tg.StartGame()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	showText(s, textX, textY, defStyle, defStyle, defStyle, string(tg.Text), 0)
 	//drawBox(s, boxX, boxY, redCharStyle)
 	for {
@@ -138,6 +168,16 @@ func SoloTyper() {
 				case *tcell.EventKey:
 					if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 						return
+					} else if ev.Key() == tcell.KeyF7 {
+						var status bool
+						err := handlers.SaveResult(tg.WPM, tg.PlayerScore, tg.TyposCount)
+						s.Sync()
+						if err != nil {
+							status = false
+						} else {
+							status = true
+						}
+						showStatus(s, status)
 					}
 				}
 			}
@@ -149,7 +189,7 @@ func SoloTyper() {
 			s.Sync()
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
-				return
+				tg.GameState = false
 			} else if ev.Key() == tcell.KeyCtrlL {
 				s.Sync()
 			} else {

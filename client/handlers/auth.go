@@ -1,19 +1,18 @@
-package main
+package handlers
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
 	"github.com/manifoldco/promptui"
-	"github.com/woeatory/Adamantite-TypeRacer/cmd/server"
-	"io"
+	"github.com/woeatory/Adamantite-TypeRacer/client/http_client"
+	"github.com/woeatory/Adamantite-TypeRacer/server/server"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
 // todo there is a lot of copy-past. find better solution
-
 var usernamePrompt = promptui.Prompt{
 	Label:       "username",
 	Default:     "",
@@ -44,72 +43,67 @@ var passwordPrompt = promptui.Prompt{
 	Stdout:      nil,
 }
 
-func LogIn() {
+func LogIn() error {
 	username, err := usernamePrompt.Run()
 	if err != nil {
-		return
+		return err
 	}
-
 	password, err := passwordPrompt.Run()
 	if err != nil {
-		return
+		return err
 	}
 	payload := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password))
 	const PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthLogin
-
-	resp, err := http.Post(PATH, "application/json", bytes.NewBuffer(payload))
+	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))
 	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return
+		return err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	req.Header.Set("Content-Type", "application/json")
 
-		}
-	}(resp.Body)
-
-	body, err := ioutil.ReadAll(resp.Body)
+	resp, err := http_client.HttpClient.Do(req)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return
+		return err
 	}
+	defer resp.Body.Close()
 
-	fmt.Println("Response:", string(body))
+	// Read the response body
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func SignUp() {
+func SignUp() error {
 	username, err := usernamePrompt.Run()
 	if err != nil {
-		return
+		return err
 	}
 
 	password, err := passwordPrompt.Run()
 	if err != nil {
-		return
+		return err
 	}
 	payload := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password))
 	const PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthSignUp
-
-	resp, err := http.Post(PATH, "application/json", bytes.NewBuffer(payload))
+	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))
 	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return
+		return err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+	req.Header.Set("Content-Type", "application/json")
 
-		}
-	}(resp.Body)
-
-	body, err := ioutil.ReadAll(resp.Body)
+	resp, err := http_client.HttpClient.Do(req)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return
+		return err
 	}
+	defer resp.Body.Close()
 
-	fmt.Println("Response:", string(body))
+	// Read the response body
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func usernameValidator(s string) error {
