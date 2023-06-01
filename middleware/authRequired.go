@@ -12,7 +12,7 @@ func Authentication() gin.HandlerFunc {
 		sessionID := session.Get("id")
 		if sessionID == nil {
 			c.JSON(
-				http.StatusNotFound, gin.H{
+				http.StatusUnauthorized, gin.H{
 					"message": "unauthorized",
 				},
 			)
