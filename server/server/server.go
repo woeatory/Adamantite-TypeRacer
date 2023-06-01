@@ -55,7 +55,7 @@ func SetUpAndBoot() {
 	authController := authContr.NewAuthController(authService)
 	scoreController := scoreContr.NewScoreController(scoreService)
 
-	router := gin.Default()
+	router := SetUpRouter()
 	store := cookie.NewStore([]byte("secret"))
 	router.Use(sessions.Sessions("mysession", store))
 
@@ -107,4 +107,12 @@ func SetUpAndBoot() {
 	}
 
 	log.Println("Server exiting")
+	err := repo.CloseRepo()
+	if err != nil {
+		return
+	}
+}
+
+func SetUpRouter() *gin.Engine {
+	return gin.Default()
 }
