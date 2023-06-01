@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/manifoldco/promptui"
-	"github.com/woeatory/Adamantite-TypeRacer/cmd/server"
-	"github.com/woeatory/Adamantite-TypeRacer/internal/game"
+	"github.com/woeatory/Adamantite-TypeRacer/client/game"
+	"github.com/woeatory/Adamantite-TypeRacer/client/handlers"
 )
 
 func main() {
-	go server.SetUpAndBoot()
 	selects := promptui.Select{
 		Label: "Welcome to Adamantite-TypeRacer - a CLI-based typing game",
 		Items: []string{
@@ -29,9 +28,12 @@ func main() {
 		}
 		switch num {
 		case 0: // Log In
-			LogIn()
+			err := handlers.LogIn()
+			if err != nil {
+				return
+			}
 		case 1: // Sign Up
-			SignUp()
+			handlers.SignUp()
 		case 2: // Play solo
 			game.SoloTyper()
 		case 3: // Create room

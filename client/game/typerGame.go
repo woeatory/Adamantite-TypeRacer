@@ -56,7 +56,7 @@ func (tg *TyperGame) HandleKey(pressed rune) (int, bool) {
 }
 
 func (tg *TyperGame) StartGame() error {
-	text, err := os.ReadFile("internal/game/texts/text.txt")
+	text, err := os.ReadFile("client/game/texts/text.txt")
 	if err != nil {
 		return err
 	}
