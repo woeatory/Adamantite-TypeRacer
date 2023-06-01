@@ -1,4 +1,4 @@
-package user_test
+package tests_test
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,17 +11,21 @@ import (
 )
 
 func TestGetAll(t *testing.T) {
+	// arrange
 	db, mock, err := sqlmock.New()
 	userService := service.NewUserService(&repository.Repo{DB: db})
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 	defer db.Close()
+	// mock expects
 	expectedRows := sqlmock.NewRows([]string{"user_id", "username", "password_hash", "created_at"}).
 		AddRow(uuid.New(), "user1", "hash1", time.Now()).
 		AddRow(uuid.New(), "user2", "hash2", time.Now())
 	mock.ExpectQuery("SELECT (.+) FROM users").WillReturnRows(expectedRows)
+	// act
 	users, err := userService.GetAll()
+	// assert
 	assert.NoError(t, err)
 	assert.Len(t, users, 2)
 
@@ -53,6 +57,7 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestChangeUsername(t *testing.T) {
+	// arrange
 	db, mock, err := sqlmock.New()
 	userService := service.NewUserService(&repository.Repo{DB: db})
 	if err != nil {
@@ -60,11 +65,13 @@ func TestChangeUsername(t *testing.T) {
 	}
 	defer db.Close()
 	userID := uuid.New()
+	// mock expects
 	_ = sqlmock.NewRows([]string{"user_id", "username", "password_hash", "created_at"}).
 		AddRow(userID, "user1", "hash1", time.Now())
 	query := "UPDATE users"
 	mock.ExpectPrepare(query)
 	mock.ExpectExec(query).WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
+	// act
 	err = userService.ChangeUsername("newName", userID.String())
 	if err != nil {
 		return
@@ -76,6 +83,7 @@ func TestChangeUsername(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
+	// arrange
 	db, mock, err := sqlmock.New()
 	userService := service.NewUserService(&repository.Repo{DB: db})
 	if err != nil {
@@ -86,8 +94,10 @@ func TestDeleteUser(t *testing.T) {
 	_ = sqlmock.NewRows([]string{"user_id", "username", "password_hash", "created_at"}).
 		AddRow(userID, "user1", "hash1", time.Now())
 	query := "DELETE FROM users WHERE (.+)"
+	// mock expects
 	mock.ExpectPrepare(query)
 	mock.ExpectExec(query).WithArgs(userID).WillReturnResult(sqlmock.NewResult(0, 1))
+	// act
 	err = userService.ChangeUsername("newName", userID.String())
 	if err != nil {
 		return
@@ -95,5 +105,6 @@ func TestDeleteUser(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
+	// assert
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

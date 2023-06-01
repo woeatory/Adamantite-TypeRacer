@@ -1,4 +1,4 @@
-package auth_test
+package tests_test
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,6 +11,7 @@ import (
 )
 
 func TestLogIn(t *testing.T) {
+	// arrange
 	db, mock, err := sqlmock.New()
 	authService := service.NewAuthService(&repository.Repo{DB: db})
 	if err != nil {
@@ -22,11 +23,13 @@ func TestLogIn(t *testing.T) {
 		Username: "user1",
 		Password: "12345678",
 	}
+	// mock expects
 	row := sqlmock.NewRows([]string{"username", "password_hash"}).
 		AddRow(user.Username, hash)
 	query := "SELECT (.+) FROM users"
 	mock.ExpectPrepare(query)
 	mock.ExpectQuery(query).WithArgs(user.Username).WillReturnRows(row)
+	// act
 	_, err = authService.LogIn(user)
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -36,6 +39,7 @@ func TestLogIn(t *testing.T) {
 }
 
 func TestSignUp(t *testing.T) {
+	// arrange
 	db, mock, err := sqlmock.New()
 	authService := service.NewAuthService(&repository.Repo{DB: db})
 	if err != nil {
@@ -47,7 +51,9 @@ func TestSignUp(t *testing.T) {
 		Password: "pass1",
 	}
 	query := "INSERT INTO users"
+	// mock expects
 	mock.ExpectExec(query).WillReturnResult(sqlmock.NewResult(0, 1))
+	// act
 	_, err = authService.SignUp(newUser)
 	if err != nil {
 		t.Fatalf(err.Error())
