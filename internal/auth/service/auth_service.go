@@ -17,7 +17,6 @@ func NewAuthService(repo *repository.Repo) *AuthService {
 	return &AuthService{repo: repo}
 }
 func (authService *AuthService) LogIn(dto DTO.UserDTO) (string, error) {
-
 	query := "SELECT user_id, password_hash FROM users WHERE username = $1"
 	stmt, err := authService.repo.DB.Prepare(query)
 	if err != nil {

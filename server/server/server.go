@@ -27,17 +27,18 @@ const PORT = ":8080"
 const ADDRESS = "localhost" + PORT
 
 const (
-	UserGroupPath     = "user"
-	UserGetAllPath    = "/getAll"
-	UserGetByIdPath   = "/:userID"
-	ChangeUserName    = "/changeUsername"
-	DeleteUser        = "/deleteUser"
-	AuthGroupPath     = "auth"
-	AuthLogin         = "/login"
-	AuthSignUp        = "/signup"
-	ScoreGroupPath    = "score"
-	NewScoreRecord    = "/newScoreRecord"
-	DeleteScoreRecord = "/deleteScoreRecord"
+	UserGroupPath      = "user"
+	UserGetAllPath     = "/getAll"
+	UserGetByIdPath    = "/:userID"
+	ChangeUserName     = "/changeUsername"
+	DeleteUser         = "/deleteUser"
+	AuthGroupPath      = "auth"
+	AuthLogin          = "/login"
+	AuthSignUp         = "/signup"
+	ScoreGroupPath     = "score"
+	NewScoreRecord     = "/newScoreRecord"
+	GetAllUsersRecords = "/GetAllUsersRecords" // todo implement
+	DeleteScoreRecord  = "/deleteScoreRecord"
 )
 
 func SetUpAndBoot() {
