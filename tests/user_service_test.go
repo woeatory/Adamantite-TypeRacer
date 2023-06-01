@@ -46,7 +46,6 @@ func TestGetByID(t *testing.T) {
 	}
 	expectedRow := sqlmock.NewRows([]string{"user_id", "username", "password_hash", "created_at"}).
 		AddRow(userID, "user1", "hash1", time.Now())
-
 	mock.ExpectPrepare("SELECT (.+) FROM users WHERE (.+)")
 	mock.ExpectQuery("SELECT (.+) FROM users WHERE (.+)").WithArgs(userID).WillReturnRows(expectedRow)
 	_, err = userService.GetByID(userID.String())

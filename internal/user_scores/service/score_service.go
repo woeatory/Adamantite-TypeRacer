@@ -1,6 +1,9 @@
 package service
 
-import "github.com/woeatory/Adamantite-TypeRacer/internal/repository"
+import (
+	"github.com/woeatory/Adamantite-TypeRacer/internal/repository"
+	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/models"
+)
 
 type ScoreService struct {
 	repo *repository.Repo
@@ -21,6 +24,29 @@ func (scoreService *ScoreService) NewScoreRecord(userID string, wpm, accuracy, t
 		return err
 	}
 	return nil
+}
+
+func (scoreService *ScoreService) GetRecordsByUserID(userID string) ([]models.ScoreRecord, error) {
+	query := "SELECT * FROM scores WHERE user_id = $1"
+	stmt, err := scoreService.repo.DB.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	var records []models.ScoreRecord
+	rows, err := stmt.Query(userID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var record models.ScoreRecord
+		if err := rows.Scan(
+			&record.RecordID, &record.UserID, &record.WPM, &record.Accuracy, &record.Typos,
+		); err != nil {
+			return nil, err
+		}
+		records = append(records, record)
+	}
+	return records, nil
 }
 
 func (scoreService *ScoreService) DeleteScoreRecord(userID string, recordID int) error {
