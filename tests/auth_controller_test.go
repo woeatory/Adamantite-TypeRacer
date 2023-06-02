@@ -112,6 +112,38 @@ func TestLogInOk(t *testing.T) {
 	mockAuthService.AssertCalled(t, "LogIn", mock.AnythingOfType("DTO.UserDTO"))
 }
 
+func TestLogInBadRequest(t *testing.T) {
+	mockAuthService := new(mocks.MockAuthService)
+	authController := controller.NewAuthController(mockAuthService)
+	errorMessage := "wrong"
+	mockAuthService.
+		On("LogIn", mock.AnythingOfType("DTO.UserDTO")).
+		Return("", errors.New(errorMessage))
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	store := cookie.NewStore([]byte("secret"))
+	router.Use(sessions.Sessions("testsesesion", store))
+	router.POST("/auth/login", authController.LogIn)
+
+	// Prepare a test request
+	var input = DTO.UserDTO{
+		Username: "username1",
+		Password: "password1",
+	}
+	payload, _ := json.Marshal(input)
+
+	rec := httptest.NewRecorder()
+	// Call the API handler
+	req, _ := http.NewRequest("POST", "/auth/login", bytes.NewBuffer(payload))
+	router.ServeHTTP(rec, req)
+	expectedResponse := gin.H{"error": errorMessage}
+	// Assert the response
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.JSONEq(t, toJson(t, expectedResponse), rec.Body.String())
+	// Assert the function calls
+	mockAuthService.AssertCalled(t, "LogIn", mock.AnythingOfType("DTO.UserDTO"))
+}
+
 func toJson(t *testing.T, v interface{}) string {
 	jsonStr, err := json.Marshal(v)
 	if err != nil {
