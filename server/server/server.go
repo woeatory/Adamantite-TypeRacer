@@ -5,6 +5,8 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -23,8 +25,11 @@ import (
 	"net/http"
 )
 
-const PORT = ":8080"
-const ADDRESS = "localhost" + PORT
+var (
+	PORT    = ":"
+	DOMAIN  string
+	ADDRESS = DOMAIN + PORT
+)
 
 const (
 	UserGroupPath      = "user"
@@ -37,11 +42,17 @@ const (
 	AuthSignUp         = "/signup"
 	ScoreGroupPath     = "score"
 	NewScoreRecord     = "/newScoreRecord"
-	GetAllUsersRecords = "/GetAllUsersRecords" // todo implement
+	GetAllUsersRecords = "/getAllUsersRecords" // todo implement
 	DeleteScoreRecord  = "/deleteScoreRecord"
 )
 
 func SetUpAndBoot() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading env: %s\n", err)
+	}
+	PORT += os.Getenv("PORT")
+	DOMAIN = os.Getenv("DOMAIN")
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -78,6 +89,7 @@ func SetUpAndBoot() {
 	scoreGroup.Use(middleware.Authentication())
 	{
 		scoreGroup.POST(NewScoreRecord, scoreController.AddNewScoreRecord)
+		scoreGroup.GET(GetAllUsersRecords, scoreController.GetAllUsersRecords)
 		scoreGroup.DELETE(DeleteScoreRecord, scoreController.DeleteScoreRecord)
 	}
 
@@ -108,9 +120,9 @@ func SetUpAndBoot() {
 	}
 
 	log.Println("Server exiting")
-	err := repo.CloseRepo()
+	err = repo.CloseRepo()
 	if err != nil {
-		return
+		log.Fatalf("Error closing DB: %s\n", err)
 	}
 }
 
