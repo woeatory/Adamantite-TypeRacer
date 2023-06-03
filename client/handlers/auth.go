@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/manifoldco/promptui"
 	"github.com/woeatory/Adamantite-TypeRacer/client/http_client"
-	"github.com/woeatory/Adamantite-TypeRacer/server/server"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -53,7 +52,7 @@ func LogIn() error {
 		return err
 	}
 	payload := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password))
-	var PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthLogin
+	var PATH = "http://" + http_client.ADDRESS + http_client.Login
 	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))
 	if err != nil {
 		return err
@@ -85,7 +84,7 @@ func SignUp() error {
 		return err
 	}
 	payload := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password))
-	var PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthSignUp
+	var PATH = "http://" + http_client.ADDRESS + http_client.Signup
 	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))
 	if err != nil {
 		return err

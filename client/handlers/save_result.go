@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/woeatory/Adamantite-TypeRacer/client/http_client"
-	"github.com/woeatory/Adamantite-TypeRacer/server/server"
 	"io/ioutil"
 	"net/http"
 )
@@ -26,7 +25,7 @@ func SaveResult(wpm, accuracy, typos int) error {
 	if err != nil {
 		return err
 	}
-	var PATH = "http://" + server.ADDRESS + "/" + server.ScoreGroupPath + server.NewScoreRecord
+	var PATH = "http://" + http_client.ADDRESS + http_client.SaveResult
 
 	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))
 	if err != nil {
