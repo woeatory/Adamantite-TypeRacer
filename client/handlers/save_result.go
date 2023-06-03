@@ -23,6 +23,9 @@ func SaveResult(wpm, accuracy, typos int) error {
 		Typos:    typos,
 	}
 	payload, err := json.Marshal(record)
+	if err != nil {
+		return err
+	}
 	const PATH = "http://" + server.ADDRESS + "/" + server.ScoreGroupPath + server.NewScoreRecord
 
 	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))

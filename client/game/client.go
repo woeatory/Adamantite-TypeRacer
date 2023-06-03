@@ -158,7 +158,7 @@ func SoloTyper() {
 	for {
 		showScore(s, scoreX, scoreY, tg.PlayerScore, scoreStyle)
 		s.Sync()
-		if tg.GameState == false {
+		if !tg.GameState {
 			s.Clear()
 			showEndGame(s, tg.WPM, tg.PlayerScore, tg.PressCounter, tg.TyposCount)
 			s.Sync()

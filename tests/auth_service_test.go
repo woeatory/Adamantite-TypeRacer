@@ -19,6 +19,9 @@ func TestLogIn(t *testing.T) {
 	}
 	defer db.Close()
 	hash, err := bcrypt.GenerateFromPassword([]byte("12345678"), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var user = DTO.UserDTO{
 		Username: "user1",
 		Password: "12345678",
