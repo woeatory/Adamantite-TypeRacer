@@ -53,7 +53,7 @@ func LogIn() error {
 		return err
 	}
 	payload := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password))
-	const PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthLogin
+	var PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthLogin
 	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func SignUp() error {
 		return err
 	}
 	payload := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password))
-	const PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthSignUp
+	var PATH = "http://" + server.ADDRESS + "/" + server.AuthGroupPath + server.AuthSignUp
 	req, err := http.NewRequest(http.MethodPost, PATH, bytes.NewBuffer(payload))
 	if err != nil {
 		return err

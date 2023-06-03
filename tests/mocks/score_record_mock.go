@@ -14,7 +14,7 @@ func (m *MockScoreRecord) NewScoreRecord(userID string, wpm, accuracy, typos int
 	return args.Error(0)
 }
 
-func (m *MockScoreRecord) GetRecordsByUserID(userID string) ([]models.ScoreRecord, error) {
+func (m *MockScoreRecord) GetAllUsersScoreRecords(userID string) ([]models.ScoreRecord, error) {
 	args := m.Called(userID)
 	return args.Get(0).([]models.ScoreRecord), args.Error(1)
 }

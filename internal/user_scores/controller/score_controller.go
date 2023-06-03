@@ -23,13 +23,24 @@ func (scoreController *ScoreController) AddNewScoreRecord(c *gin.Context) {
 		return
 	}
 	session := sessions.Default(c)
-	var userID string = session.Get("id").(string)
+	userID := session.Get("id").(string)
 	err := scoreController.scoreService.NewScoreRecord(userID, input.WPM, input.Accuracy, input.Typos)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error while inserting new record:" + err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Record Added Successfully"})
+}
+
+func (scoreController *ScoreController) GetAllUsersRecords(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("id").(string)
+	res, err := scoreController.scoreService.GetAllUsersScoreRecords(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error getting users records:" + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": res})
 }
 
 func (scoreController *ScoreController) DeleteScoreRecord(c *gin.Context) {
@@ -39,7 +50,7 @@ func (scoreController *ScoreController) DeleteScoreRecord(c *gin.Context) {
 		return
 	}
 	session := sessions.Default(c)
-	var userID string = session.Get("id").(string)
+	userID := session.Get("id").(string)
 	err := scoreController.scoreService.DeleteScoreRecord(userID, input.RecordID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
