@@ -170,6 +170,9 @@ func SoloTyper() {
 						return
 					} else if ev.Key() == tcell.KeyF7 {
 						var status bool
+						if status == true {
+							continue
+						}
 						err := handlers.SaveResult(tg.WPM, tg.PlayerScore, tg.TyposCount)
 						s.Sync()
 						if err != nil {
@@ -178,6 +181,7 @@ func SoloTyper() {
 							status = true
 						}
 						showStatus(s, status)
+						s.Sync()
 					}
 				}
 			}
