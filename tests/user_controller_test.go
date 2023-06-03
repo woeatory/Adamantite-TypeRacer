@@ -4,15 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user/controller"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user/model"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user/model/DTO"
-	"github.com/woeatory/Adamantite-TypeRacer/middleware"
 	"github.com/woeatory/Adamantite-TypeRacer/tests/mocks"
 	"net/http"
 	"net/http/httptest"
@@ -254,35 +251,4 @@ func TestDeleteUserShouldReturnUnauthorized(t *testing.T) {
 	assert.JSONEq(t, toJson(t, expectedResponse), rec.Body.String())
 	// Assert mock expectation
 	mockUserService.AssertNotCalled(t, "DeleteUser", mockedUserID.String())
-}
-
-func setUpRouterWithAuth(userID string) *gin.Engine {
-	// setup router with needed middleware and etc
-	gin.SetMode(gin.TestMode)
-	router := gin.Default()
-	store := cookie.NewStore([]byte("secret"))
-	router.Use(sessions.Sessions("testsesesion", store))
-	router.Use(
-		func(c *gin.Context) {
-			session := sessions.Default(c)
-			session.Set("id", userID)
-			err := session.Save()
-			if err != nil {
-				return
-			}
-			c.Next()
-		},
-	)
-	router.Use(middleware.Authentication())
-	return router
-}
-
-func setUpRouterNotAuth() *gin.Engine {
-	// setup router with needed middleware and etc
-	gin.SetMode(gin.TestMode)
-	router := gin.Default()
-	store := cookie.NewStore([]byte("secret"))
-	router.Use(sessions.Sessions("testsesesion", store))
-	router.Use(middleware.Authentication())
-	return router
 }

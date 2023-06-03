@@ -9,34 +9,27 @@ import (
 )
 
 type ScoreController struct {
-	scoreService *service.ScoreService
+	scoreService service.ScoreRecorder
 }
 
-func NewScoreController(service *service.ScoreService) *ScoreController {
+func NewScoreController(service service.ScoreRecorder) *ScoreController {
 	return &ScoreController{scoreService: service}
 }
 
-func (scoreController *ScoreController) AddNewScore(c *gin.Context) {
+func (scoreController *ScoreController) AddNewScoreRecord(c *gin.Context) {
 	var input DTO.NewScoreRecordDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	session := sessions.Default(c)
-	var userID string
-	v := session.Get("id")
-	if v == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "unauthorized"})
-		return
-	} else {
-		userID = v.(string)
-	}
+	var userID string = session.Get("id").(string)
 	err := scoreController.scoreService.NewScoreRecord(userID, input.WPM, input.Accuracy, input.Typos)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "error while inserting new record"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error while inserting new record:" + err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "record added successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Record Added Successfully"})
 }
 
 func (scoreController *ScoreController) DeleteScoreRecord(c *gin.Context) {
@@ -46,18 +39,11 @@ func (scoreController *ScoreController) DeleteScoreRecord(c *gin.Context) {
 		return
 	}
 	session := sessions.Default(c)
-	var userID string
-	v := session.Get("id")
-	if v == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "unauthorized"})
-		return
-	} else {
-		userID = v.(string)
-	}
+	var userID string = session.Get("id").(string)
 	err := scoreController.scoreService.DeleteScoreRecord(userID, input.RecordID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"message": "record deleted successfully"})
+	c.JSON(http.StatusBadRequest, gin.H{"message": "Record Deleted Successfully"})
 }
