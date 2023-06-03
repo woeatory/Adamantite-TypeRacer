@@ -7,6 +7,7 @@ import (
 	"github.com/woeatory/Adamantite-TypeRacer/internal/repository"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/service"
 	"testing"
+	"time"
 )
 
 func TestNewRecord(t *testing.T) {
@@ -43,14 +44,14 @@ func TestGetRecordsByUserID(t *testing.T) {
 	}
 	defer db.Close()
 	// mock expects
-	expected := mock.NewRows([]string{"record_id", "user_id", "wpm", "accuracy", "typos"}).
-		AddRow(recordID, userID.String(), 1, 1, 1)
+	expected := mock.NewRows([]string{"record_id", "user_id", "wpm", "accuracy", "typos", "created_at"}).
+		AddRow(recordID, userID.String(), 1, 1, 1, time.Now())
 	//AddRow(2, uuid.New().String())
 	query := "SELECT (.+) FROM scores WHERE (.+)"
 	mock.ExpectPrepare(query)
 	mock.ExpectQuery(query).WithArgs(userID).WillReturnRows(expected)
 	// act
-	_, err = scoreService.GetRecordsByUserID(userID.String())
+	_, err = scoreService.GetAllUsersScoreRecords(userID.String())
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

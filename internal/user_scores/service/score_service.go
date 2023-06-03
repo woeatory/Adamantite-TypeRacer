@@ -7,7 +7,7 @@ import (
 
 type ScoreRecorder interface {
 	NewScoreRecord(userID string, wpm, accuracy, typos int) error
-	GetRecordsByUserID(userID string) ([]models.ScoreRecord, error)
+	GetAllUsersScoreRecords(userID string) ([]models.ScoreRecord, error)
 	DeleteScoreRecord(userID string, recordID int) error
 }
 
@@ -32,7 +32,7 @@ func (scoreService *ScoreService) NewScoreRecord(userID string, wpm, accuracy, t
 	return nil
 }
 
-func (scoreService *ScoreService) GetRecordsByUserID(userID string) ([]models.ScoreRecord, error) {
+func (scoreService *ScoreService) GetAllUsersScoreRecords(userID string) ([]models.ScoreRecord, error) {
 	query := "SELECT * FROM scores WHERE user_id = $1"
 	stmt, err := scoreService.repo.DB.Prepare(query)
 	if err != nil {
@@ -46,7 +46,7 @@ func (scoreService *ScoreService) GetRecordsByUserID(userID string) ([]models.Sc
 	for rows.Next() {
 		var record models.ScoreRecord
 		if err := rows.Scan(
-			&record.RecordID, &record.UserID, &record.WPM, &record.Accuracy, &record.Typos,
+			&record.RecordID, &record.UserID, &record.WPM, &record.Accuracy, &record.Typos, &record.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

@@ -32,18 +32,18 @@ var (
 )
 
 const (
-	UserGroupPath      = "user"
-	UserGetAllPath     = "/getAll"
-	UserGetByIdPath    = "/:userID"
-	ChangeUserName     = "/changeUsername"
-	DeleteUser         = "/deleteUser"
-	AuthGroupPath      = "auth"
-	AuthLogin          = "/login"
-	AuthSignUp         = "/signup"
-	ScoreGroupPath     = "score"
-	NewScoreRecord     = "/newScoreRecord"
-	GetAllUsersRecords = "/getAllUsersRecords" // todo implement
-	DeleteScoreRecord  = "/deleteScoreRecord"
+	UserGroupPath           = "user"
+	UserGetAllPath          = "/getAll"
+	UserGetByIdPath         = "/:userID"
+	ChangeUserName          = "/changeUsername"
+	DeleteUser              = "/deleteUser"
+	AuthGroupPath           = "auth"
+	AuthLogin               = "/login"
+	AuthSignUp              = "/signup"
+	ScoreGroupPath          = "score"
+	NewScoreRecord          = "/newScoreRecord"
+	GetAllUsersScoreRecords = "/getAllUsersScoreRecords"
+	DeleteScoreRecord       = "/deleteScoreRecord"
 )
 
 func SetUpAndBoot() {
@@ -89,7 +89,7 @@ func SetUpAndBoot() {
 	scoreGroup.Use(middleware.Authentication())
 	{
 		scoreGroup.POST(NewScoreRecord, scoreController.AddNewScoreRecord)
-		scoreGroup.GET(GetAllUsersRecords, scoreController.GetAllUsersRecords)
+		scoreGroup.GET(GetAllUsersScoreRecords, scoreController.GetAllUsersRecords)
 		scoreGroup.DELETE(DeleteScoreRecord, scoreController.DeleteScoreRecord)
 	}
 

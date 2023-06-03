@@ -8,11 +8,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/controller"
+	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/models"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/models/DTO"
 	"github.com/woeatory/Adamantite-TypeRacer/tests/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestAddNewScoreRecordShouldReturnOk(t *testing.T) {
@@ -162,4 +164,67 @@ func TestDeleteScoreRecordShouldReturnUnauthorized(t *testing.T) {
 	assert.JSONEq(t, toJson(t, expectedResponse), rec.Body.String())
 	// Assert the function calls
 	mockScoreService.AssertNotCalled(t, "DeleteScoreRecord", mockedUserID.String(), mockedRecordId)
+}
+
+func TestGetAllUsersRecordsShouldReturnOkAndArrayOfRecords(t *testing.T) {
+	// Arrange
+	mockedUserID := uuid.New()
+	mockScoreService := new(mocks.MockScoreRecord)
+	scoreController := controller.NewScoreController(mockScoreService)
+	mockedResult := []models.ScoreRecord{
+		{
+			RecordID:  1,
+			UserID:    mockedUserID,
+			WPM:       60,
+			Accuracy:  90,
+			Typos:     2,
+			CreatedAt: time.Now(),
+		},
+		{
+			RecordID:  2,
+			UserID:    mockedUserID,
+			WPM:       70,
+			Accuracy:  95,
+			Typos:     1,
+			CreatedAt: time.Now(),
+		},
+	}
+	mockScoreService.
+		On("GetAllUsersScoreRecords", mockedUserID.String()).
+		Return(mockedResult, nil)
+
+	router := setUpRouterWithAuth(mockedUserID.String())
+	router.GET("/score/getAllUsersScoreRecords", scoreController.GetAllUsersRecords)
+	// Prepare a test request
+	rec := httptest.NewRecorder()
+	// Call the API handler
+	req, _ := http.NewRequest("GET", "/score/getAllUsersScoreRecords", nil)
+	router.ServeHTTP(rec, req)
+	expectedResponse := gin.H{"message": mockedResult}
+	// Assert the response
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.JSONEq(t, toJson(t, expectedResponse), rec.Body.String())
+	// Assert the function calls
+	mockScoreService.AssertCalled(t, "GetAllUsersScoreRecords", mockedUserID.String())
+}
+
+func TestGetAllUsersRecordsShouldReturnUnauthorized(t *testing.T) {
+	// Arrange
+	mockedUserID := uuid.New()
+	mockScoreService := new(mocks.MockScoreRecord)
+	scoreController := controller.NewScoreController(mockScoreService)
+
+	router := setUpRouterNotAuth()
+	router.GET("/score/getAllUsersScoreRecords", scoreController.GetAllUsersRecords)
+	// Prepare a test request
+	rec := httptest.NewRecorder()
+	// Call the API handler
+	req, _ := http.NewRequest("GET", "/score/getAllUsersScoreRecords", nil)
+	router.ServeHTTP(rec, req)
+	expectedResponse := gin.H{"error": "unauthorized"}
+	// Assert the response
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	assert.JSONEq(t, toJson(t, expectedResponse), rec.Body.String())
+	// Assert the function calls
+	mockScoreService.AssertNotCalled(t, "GetAllUsersScoreRecords", mockedUserID.String())
 }
