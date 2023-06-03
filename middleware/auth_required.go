@@ -13,7 +13,7 @@ func Authentication() gin.HandlerFunc {
 		if sessionID == nil {
 			c.JSON(
 				http.StatusUnauthorized, gin.H{
-					"message": "unauthorized",
+					"error": "unauthorized",
 				},
 			)
 			c.Abort()

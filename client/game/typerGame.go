@@ -20,11 +20,6 @@ type TyperGame struct {
 	WordsComplete int
 }
 
-func (tg *TyperGame) initGame(text string) {
-	tg.Text = []rune(text)
-	tg.currentRune = tg.Text[0]
-}
-
 func (tg *TyperGame) HandleKey(pressed rune) (int, bool) {
 	var correct bool
 	tg.PressCounter++
@@ -35,7 +30,7 @@ func (tg *TyperGame) HandleKey(pressed rune) (int, bool) {
 	} else {
 		tg.PlayerScore++
 		tg.index++
-		for true {
+		for {
 			if tg.Text[tg.index] == '\n' || tg.Text[tg.index] == '\r' {
 				tg.index++
 			} else {

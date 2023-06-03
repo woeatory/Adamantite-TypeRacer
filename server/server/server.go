@@ -77,7 +77,7 @@ func SetUpAndBoot() {
 	scoreGroup := router.Group(ScoreGroupPath)
 	scoreGroup.Use(middleware.Authentication())
 	{
-		scoreGroup.POST(NewScoreRecord, scoreController.AddNewScore)
+		scoreGroup.POST(NewScoreRecord, scoreController.AddNewScoreRecord)
 		scoreGroup.DELETE(DeleteScoreRecord, scoreController.DeleteScoreRecord)
 	}
 

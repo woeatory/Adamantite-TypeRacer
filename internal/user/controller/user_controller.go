@@ -9,10 +9,10 @@ import (
 )
 
 type UserController struct {
-	userService *service.UserService
+	userService service.UserServiceInterface
 }
 
-func NewUserController(userService *service.UserService) *UserController {
+func NewUserController(userService service.UserServiceInterface) *UserController {
 	return &UserController{
 		userService: userService,
 	}
@@ -21,7 +21,7 @@ func NewUserController(userService *service.UserService) *UserController {
 func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 	users, err := userController.userService.GetAll()
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": users})
@@ -30,46 +30,38 @@ func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 func (userController *UserController) GetUserByID(c *gin.Context) {
 	user, err := userController.userService.GetByID(c.Param("userID"))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 func (userController *UserController) ChangeUsername(c *gin.Context) {
-	var input DTO.ChangeUsernameDTO
+	var input DTO.UserChangeUsernameDto
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	session := sessions.Default(c)
-	var userID string
-	v := session.Get("id")
-	if v == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "unauthorized"})
-		return
-	} else {
-		userID = v.(string)
-	}
+	var userID string = session.Get("id").(string)
 	err := userController.userService.ChangeUsername(input.NewUsername, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "successfully changed username"})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully Changed Username"})
 }
 
 func (userController *UserController) DeleteUser(c *gin.Context) {
-
 	session := sessions.Default(c)
-	var userID string
-	v := session.Get("id")
-	if v == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "unauthorized"})
-		return
-	} else {
-		userID = v.(string)
-	}
+	var userID string = session.Get("id").(string)
+	//v := session.Get("id")
+	//if v == nil {
+	//	c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
+	//	return
+	//} else {
+	//	userID = v.(string)
+	//}
 	err := userController.userService.DeleteUser(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -80,5 +72,5 @@ func (userController *UserController) DeleteUser(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "successfully deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully Deleted User"})
 }

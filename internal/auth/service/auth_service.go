@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+type Authenticator interface {
+	LogIn(dto DTO.UserDTO) (string, error)
+	SignUp(dto DTO.UserDTO) (string, error)
+}
+
 type AuthService struct {
 	repo *repository.Repo
 }

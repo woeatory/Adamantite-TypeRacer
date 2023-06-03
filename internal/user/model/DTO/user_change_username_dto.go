@@ -1,5 +1,5 @@
 package DTO
 
-type ChangeUsernameDTO struct {
+type UserChangeUsernameDto struct {
 	NewUsername string `json:"newUsername" binding:"required"`
 }

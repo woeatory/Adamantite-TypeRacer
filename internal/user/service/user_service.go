@@ -5,6 +5,13 @@ import (
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user/model"
 )
 
+type UserServiceInterface interface {
+	GetAll() ([]model.User, error)
+	GetByID(userID string) (model.User, error)
+	ChangeUsername(newUsername, userID string) error
+	DeleteUser(userID string) error
+}
+
 type UserService struct {
 	repo repository.Repo
 }
@@ -16,7 +23,7 @@ func NewUserService(repo *repository.Repo) *UserService {
 func (userService *UserService) GetAll() ([]model.User, error) {
 	rows, err := userService.repo.DB.Query("SELECT * FROM users")
 	if err != nil {
-		return nil, err
+		return []model.User{}, err
 	}
 	defer rows.Close()
 	var users []model.User
@@ -38,6 +45,9 @@ func (userService *UserService) GetByID(userID string) (model.User, error) {
 	}
 	var user model.User
 	err = stmt.QueryRow(userID).Scan(&user.UserID, &user.Username, &user.CreatedAt)
+	if err != nil {
+		return model.User{}, err
+	}
 	return user, nil
 }
 

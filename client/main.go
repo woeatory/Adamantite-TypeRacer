@@ -20,7 +20,7 @@ func main() {
 		},
 		HideSelected: true,
 	}
-	for true {
+	for {
 		num, _, err := selects.Run()
 		if err != nil {
 			fmt.Printf("Prompt failed %v\n", err)
@@ -30,10 +30,15 @@ func main() {
 		case 0: // Log In
 			err := handlers.LogIn()
 			if err != nil {
-				return
+				fmt.Println(err)
+				continue
 			}
 		case 1: // Sign Up
-			handlers.SignUp()
+			err := handlers.SignUp()
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
 		case 2: // Play solo
 			game.SoloTyper()
 		case 3: // Create room

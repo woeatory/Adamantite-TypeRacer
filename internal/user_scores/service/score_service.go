@@ -5,6 +5,12 @@ import (
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/models"
 )
 
+type ScoreRecorder interface {
+	NewScoreRecord(userID string, wpm, accuracy, typos int) error
+	GetRecordsByUserID(userID string) ([]models.ScoreRecord, error)
+	DeleteScoreRecord(userID string, recordID int) error
+}
+
 type ScoreService struct {
 	repo *repository.Repo
 }

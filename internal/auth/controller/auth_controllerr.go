@@ -9,10 +9,10 @@ import (
 )
 
 type AuthController struct {
-	authService *service.AuthService
+	authService service.Authenticator
 }
 
-func NewAuthController(authService *service.AuthService) *AuthController {
+func NewAuthController(authService service.Authenticator) *AuthController {
 	return &AuthController{
 		authService: authService,
 	}
@@ -34,7 +34,7 @@ func (AuthController *AuthController) LogIn(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "successfully Logged In"})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully Logged In"})
 }
 func (AuthController *AuthController) SignUp(c *gin.Context) {
 	var input DTO.UserDTO
@@ -54,5 +54,5 @@ func (AuthController *AuthController) SignUp(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "successfully Sign Up"})
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully Signed Up"})
 }
