@@ -8,6 +8,9 @@ Features:
 - creating public/private rooms to compete with other players
 - saving results in database
 
+[**List of Endpoints**](./info/endpoints.md)
+
+
 # Deployed on Render.com
 
 https://adamantite-type-racer.onrender.com
