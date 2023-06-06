@@ -28,7 +28,7 @@ go mod tidy
 go run .\server\
 ```
 
-![img.png](img.png)
+![img.png](./info/img.png)
 
 
 ### Start CLI client
@@ -37,4 +37,4 @@ go run .\server\
 go run .\client\
 ```
 
-![save.gif](save.gif)
+![save.gif](./info/save.gif)
