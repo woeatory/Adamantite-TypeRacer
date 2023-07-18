@@ -23,8 +23,12 @@ func (scoreController *ScoreController) AddNewScoreRecord(c *gin.Context) {
 		return
 	}
 	session := sessions.Default(c)
-	userID := session.Get("id").(string)
-	err := scoreController.scoreService.NewScoreRecord(userID, input.WPM, input.Accuracy, input.Typos)
+	userID := session.Get("user_id")
+	if userID == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user_id"})
+		return
+	}
+	err := scoreController.scoreService.NewScoreRecord(userID.(string), input.WPM, input.Accuracy, input.Typos)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error while inserting new record:" + err.Error()})
 		return
@@ -34,8 +38,12 @@ func (scoreController *ScoreController) AddNewScoreRecord(c *gin.Context) {
 
 func (scoreController *ScoreController) GetAllUsersRecords(c *gin.Context) {
 	session := sessions.Default(c)
-	userID := session.Get("id").(string)
-	res, err := scoreController.scoreService.GetAllUsersScoreRecords(userID)
+	userID := session.Get("user_id")
+	if userID == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user_id"})
+		return
+	}
+	res, err := scoreController.scoreService.GetAllUsersScoreRecords(userID.(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error getting users records:" + err.Error()})
 		return
@@ -50,11 +58,15 @@ func (scoreController *ScoreController) DeleteScoreRecord(c *gin.Context) {
 		return
 	}
 	session := sessions.Default(c)
-	userID := session.Get("id").(string)
-	err := scoreController.scoreService.DeleteScoreRecord(userID, input.RecordID)
+	userID := session.Get("user_id")
+	if userID == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user_id"})
+		return
+	}
+	err := scoreController.scoreService.DeleteScoreRecord(userID.(string), input.RecordID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"message": "Record Deleted Successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Record Deleted Successfully"})
 }

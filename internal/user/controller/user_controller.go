@@ -43,8 +43,12 @@ func (userController *UserController) ChangeUsername(c *gin.Context) {
 		return
 	}
 	session := sessions.Default(c)
-	var userID string = session.Get("id").(string)
-	err := userController.userService.ChangeUsername(input.NewUsername, userID)
+	userID := session.Get("user_id")
+	if userID == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting user_id"})
+		return
+	}
+	err := userController.userService.ChangeUsername(input.NewUsername, userID.(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -54,20 +58,19 @@ func (userController *UserController) ChangeUsername(c *gin.Context) {
 
 func (userController *UserController) DeleteUser(c *gin.Context) {
 	session := sessions.Default(c)
-	var userID string = session.Get("id").(string)
-	//v := session.Get("id")
-	//if v == nil {
-	//	c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
-	//	return
-	//} else {
-	//	userID = v.(string)
-	//}
-	err := userController.userService.DeleteUser(userID)
+	userID := session.Get("user_id")
+	if userID == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting user_id"})
+		return
+	}
+
+	err := userController.userService.DeleteUser(userID.(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	session.Delete("id")
+	session.Clear()
+	session.Options(sessions.Options{MaxAge: -1})
 	err = session.Save()
 	if err != nil {
 		return

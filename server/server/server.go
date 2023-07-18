@@ -2,14 +2,15 @@ package server
 
 import (
 	"context"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
 	"github.com/woeatory/Adamantite-TypeRacer/middleware"
 
@@ -54,7 +55,7 @@ func SetUpAndBoot() {
 	PORT += os.Getenv("PORT")
 	DOMAIN = os.Getenv("DOMAIN")
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	c, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	// Set up Services
@@ -68,8 +69,12 @@ func SetUpAndBoot() {
 	scoreController := scoreContr.NewScoreController(scoreService)
 
 	router := SetUpRouter()
-	store := cookie.NewStore([]byte("secret"))
-	router.Use(sessions.Sessions("mysession", store))
+	storageSecret := os.Getenv("STORAGE_KEY")
+	if storageSecret == "" {
+		log.Fatalln("Error getting env STORAGE_KEY")
+	}
+	store := cookie.NewStore([]byte(storageSecret))
+	router.Use(sessions.Sessions("session", store))
 
 	userGroup := router.Group(UserGroupPath)
 	userGroup.Use(middleware.Authentication())
@@ -105,7 +110,7 @@ func SetUpAndBoot() {
 	}()
 
 	// Listen for the interrupt signal.
-	<-ctx.Done()
+	<-c.Done()
 
 	// Restore default behavior on the interrupt signal and notify user of shutdown.
 	stop()
@@ -113,9 +118,9 @@ func SetUpAndBoot() {
 
 	// The context is used to inform the server it has 5 seconds to finish
 	// the request it is currently handling
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	c, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(c); err != nil {
 		log.Fatal("Server forced to shutdown: ", err)
 	}
 

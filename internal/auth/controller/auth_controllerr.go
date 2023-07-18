@@ -8,6 +8,26 @@ import (
 	"net/http"
 )
 
+const MaxAge = 604800 // 1 week
+
+func saveSession(c *gin.Context, userID string) error {
+	session := sessions.Default(c)
+	session.Options(
+		sessions.Options{
+			MaxAge:   MaxAge,
+			HttpOnly: true,
+			Path:     "/",
+		},
+	)
+	session.Set("user_id", userID)
+	session.Set("user_session", "token")
+	err := session.Save()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type AuthController struct {
 	authService service.Authenticator
 }
@@ -23,15 +43,14 @@ func (AuthController *AuthController) LogIn(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	session := sessions.Default(c)
 	userID, err := AuthController.authService.LogIn(input)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	session.Set("id", userID)
-	err = session.Save()
+	err = saveSession(c, userID)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session token"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully Logged In"})
@@ -48,10 +67,9 @@ func (AuthController *AuthController) SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	session := sessions.Default(c)
-	session.Set("id", userID)
-	err = session.Save()
+	err = saveSession(c, userID)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session token"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully Signed Up"})
