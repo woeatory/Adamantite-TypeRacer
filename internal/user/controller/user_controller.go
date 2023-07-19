@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user/model/DTO"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user/service"
+	"log"
 	"net/http"
 )
 
@@ -50,6 +51,13 @@ func (userController *UserController) ChangeUsername(c *gin.Context) {
 	}
 	err := userController.userService.ChangeUsername(input.NewUsername, userID.(string))
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	session.Set("user_id", input.NewUsername)
+	err = session.Save()
+	if err != nil {
+		log.Printf("error saving new user_id in session storage: %e", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
