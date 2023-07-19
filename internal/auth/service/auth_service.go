@@ -6,6 +6,7 @@ import (
 	"github.com/woeatory/Adamantite-TypeRacer/internal/repository"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user/model"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"time"
 )
 
@@ -43,10 +44,12 @@ func (authService *AuthService) LogIn(dto DTO.UserDTO) (string, error) {
 func (authService *AuthService) SignUp(dto DTO.UserDTO) (string, error) {
 	userID, err := uuid.NewRandom()
 	if err != nil {
+		log.Printf("error generating UserID:\n%e", err)
 		return "", err
 	}
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(dto.Password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Printf("error generating hash for password:\n%e", err)
 		return "", err
 	}
 
@@ -59,6 +62,7 @@ func (authService *AuthService) SignUp(dto DTO.UserDTO) (string, error) {
 	query := "INSERT INTO users (user_id, username, password_hash, created_at) VALUES ($1, $2, $3, $4)"
 	_, err = authService.repo.DB.Exec(query, user.UserID.String(), user.Username, user.PasswordHash, user.CreatedAt)
 	if err != nil {
+		log.Printf("error inserting value:\n%e", err)
 		return "", err
 	}
 	return userID.String(), nil

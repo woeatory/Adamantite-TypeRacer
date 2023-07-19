@@ -1,14 +1,32 @@
 package controller
 
 import (
+	"encoding/hex"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/auth/models/DTO"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/auth/service"
+	"log"
+	"math/rand"
 	"net/http"
 )
 
 const MaxAge = 604800 // 1 week
+
+const TOKEN_LENGTH = 80
+const ALPHA_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const ALPHA_LOWER = "abcdefghijklmnopqrstuvwxyz"
+const ALPHA = ALPHA_UPPER + ALPHA_LOWER
+const DIGIT = "0123456789"
+const ALPHA_DIGIT = ALPHA + DIGIT
+
+func generateToken() (string, error) {
+	b := make([]byte, TOKEN_LENGTH)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
 
 func saveSession(c *gin.Context, userID string) error {
 	session := sessions.Default(c)
@@ -20,9 +38,15 @@ func saveSession(c *gin.Context, userID string) error {
 		},
 	)
 	session.Set("user_id", userID)
-	session.Set("user_session", "token")
-	err := session.Save()
+	token, err := generateToken()
 	if err != nil {
+		log.Println("Error generating token")
+		return err
+	}
+	session.Set("session_token", token)
+	err = session.Save()
+	if err != nil {
+		log.Println("Error saving token")
 		return err
 	}
 	return nil
@@ -50,7 +74,7 @@ func (AuthController *AuthController) LogIn(c *gin.Context) {
 	}
 	err = saveSession(c, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully Logged In"})
