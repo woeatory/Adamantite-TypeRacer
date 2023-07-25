@@ -78,7 +78,11 @@ func (userController *UserController) DeleteUser(c *gin.Context) {
 		return
 	}
 	session.Clear()
-	session.Options(sessions.Options{MaxAge: -1})
+	session.Options(
+		sessions.Options{
+			Path:   "/",
+			MaxAge: -1},
+	)
 	err = session.Save()
 	if err != nil {
 		return

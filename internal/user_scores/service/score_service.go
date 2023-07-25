@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/repository"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/models"
 )
@@ -61,9 +62,16 @@ func (scoreService *ScoreService) DeleteScoreRecord(userID string, recordID int)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(recordID, userID)
+	result, err := stmt.Exec(recordID, userID)
 	if err != nil {
 		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("nothing was deleted")
 	}
 	return nil
 }

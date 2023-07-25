@@ -98,3 +98,19 @@ func (AuthController *AuthController) SignUp(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully Signed Up"})
 }
+
+func (AuthController *AuthController) LogOut(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+	session.Options(
+		sessions.Options{
+			Path:   "/",
+			MaxAge: -1,
+		},
+	)
+	err := session.Save()
+	if err != nil {
+		return
+	}
+	c.Redirect(301, "/")
+}

@@ -41,6 +41,7 @@ const (
 	AuthGroupPath           = "auth"
 	AuthLogin               = "/login"
 	AuthSignUp              = "/signup"
+	AuthLogOut              = "/logout"
 	ScoreGroupPath          = "score"
 	NewScoreRecord          = "/newScoreRecord"
 	GetAllUsersScoreRecords = "/getAllUsersScoreRecords"
@@ -88,6 +89,7 @@ func SetUpAndBoot() {
 	{
 		authGroup.POST(AuthLogin, authController.LogIn)
 		authGroup.POST(AuthSignUp, authController.SignUp)
+		authGroup.POST(AuthLogOut, authController.LogOut)
 	}
 
 	scoreGroup := router.Group(ScoreGroupPath)
