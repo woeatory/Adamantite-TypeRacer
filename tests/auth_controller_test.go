@@ -144,6 +144,25 @@ func TestLogInBadRequest(t *testing.T) {
 	mockAuthService.AssertCalled(t, "LogIn", mock.AnythingOfType("DTO.UserDTO"))
 }
 
+func TestLogOutShouldReturnOk(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	store := cookie.NewStore([]byte("secret"))
+	router.Use(sessions.Sessions("testsesesion", store))
+	mockAuthService := new(mocks.MockAuthService)
+	authController := controller.NewAuthController(mockAuthService)
+	router.POST("/auth/logout", authController.LogOut)
+	rec := httptest.NewRecorder()
+	// Call the API handler
+	req, _ := http.NewRequest("POST", "/auth/logout", nil)
+	router.ServeHTTP(rec, req)
+	expectedResponse := gin.H{"message": "Successfully Logged Out"}
+	// Assert the response
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.JSONEq(t, toJson(t, expectedResponse), rec.Body.String())
+
+}
+
 func toJson(t *testing.T, v interface{}) string {
 	jsonStr, err := json.Marshal(v)
 	if err != nil {
