@@ -16,7 +16,8 @@ func setUpRouterWithAuth(userID string) *gin.Engine {
 	router.Use(
 		func(c *gin.Context) {
 			session := sessions.Default(c)
-			session.Set("id", userID)
+			session.Set("session_token", "token")
+			session.Set("user_id", userID)
 			err := session.Save()
 			if err != nil {
 				return

@@ -133,7 +133,7 @@ func TestDeleteScoreRecordShouldReturnOk(t *testing.T) {
 	router.ServeHTTP(rec, req)
 	expectedResponse := gin.H{"message": "Record Deleted Successfully"}
 	// Assert the response
-	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.JSONEq(t, toJson(t, expectedResponse), rec.Body.String())
 	// Assert the function calls
 	mockScoreService.AssertCalled(t, "DeleteScoreRecord", mockedUserID.String(), mockedRecordId)
