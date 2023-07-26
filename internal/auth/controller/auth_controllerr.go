@@ -40,13 +40,13 @@ func saveSession(c *gin.Context, userID string) error {
 	session.Set("user_id", userID)
 	token, err := generateToken()
 	if err != nil {
-		log.Println("Error generating token")
+		log.Println("error generating token")
 		return err
 	}
 	session.Set("session_token", token)
 	err = session.Save()
 	if err != nil {
-		log.Println("Error saving token")
+		log.Println("error saving token")
 		return err
 	}
 	return nil
@@ -112,5 +112,6 @@ func (AuthController *AuthController) LogOut(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	c.Redirect(301, "/")
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully Logged Out"})
+	c.Redirect(http.StatusMovedPermanently, "/")
 }

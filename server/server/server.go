@@ -26,12 +26,6 @@ import (
 	"net/http"
 )
 
-var (
-	PORT    = ":"
-	DOMAIN  string
-	ADDRESS = DOMAIN + PORT
-)
-
 const (
 	UserGroupPath           = "user"
 	UserGetAllPath          = "/getAll"
@@ -51,10 +45,9 @@ const (
 func SetUpAndBoot() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading env: %s\n", err)
+		log.Fatalf("error loading env: %s\n", err)
 	}
-	PORT += os.Getenv("PORT")
-	DOMAIN = os.Getenv("DOMAIN")
+	port := os.Getenv("PORT")
 
 	c, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -72,7 +65,7 @@ func SetUpAndBoot() {
 	router := SetUpRouter()
 	storageSecret := os.Getenv("STORAGE_KEY")
 	if storageSecret == "" {
-		log.Fatalln("Error getting env STORAGE_KEY")
+		log.Fatalln("error getting env STORAGE_KEY")
 	}
 	store := cookie.NewStore([]byte(storageSecret))
 	router.Use(sessions.Sessions("session", store))
@@ -89,7 +82,7 @@ func SetUpAndBoot() {
 	{
 		authGroup.POST(AuthLogin, authController.LogIn)
 		authGroup.POST(AuthSignUp, authController.SignUp)
-		authGroup.POST(AuthLogOut, authController.LogOut)
+		authGroup.POST(AuthLogOut, authController.SignOut)
 	}
 
 	scoreGroup := router.Group(ScoreGroupPath)
@@ -101,7 +94,7 @@ func SetUpAndBoot() {
 	}
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    port,
 		Handler: router,
 	}
 
@@ -123,13 +116,13 @@ func SetUpAndBoot() {
 	c, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(c); err != nil {
-		log.Fatal("Server forced to shutdown: ", err)
+		log.Fatal("server forced to shutdown: ", err)
 	}
 
 	log.Println("Server exiting")
 	err = repo.CloseRepo()
 	if err != nil {
-		log.Fatalf("Error closing DB: %s\n", err)
+		log.Fatalf("error closing DB: %s\n", err)
 	}
 }
 
