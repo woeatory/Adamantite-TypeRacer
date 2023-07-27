@@ -53,6 +53,7 @@ func NewRepo() *Repo {
 func (repo *Repo) CloseRepo() error {
 	err := repo.DB.Close()
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil

@@ -40,15 +40,16 @@ func saveSession(c *gin.Context, userID string) error {
 	session.Set("user_id", userID)
 	token, err := generateToken()
 	if err != nil {
-		log.Println("error generating token")
+		log.Println(err)
 		return err
 	}
 	session.Set("session_token", token)
 	err = session.Save()
 	if err != nil {
-		log.Println("error saving token")
+		log.Println(err)
 		return err
 	}
+	log.Println("generated token successfully")
 	return nil
 }
 
@@ -64,6 +65,7 @@ func NewAuthController(authService service.Authenticator) *AuthController {
 func (AuthController *AuthController) LogIn(c *gin.Context) {
 	var input DTO.UserDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -74,6 +76,7 @@ func (AuthController *AuthController) LogIn(c *gin.Context) {
 	}
 	err = saveSession(c, userID)
 	if err != nil {
+		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -82,6 +85,7 @@ func (AuthController *AuthController) LogIn(c *gin.Context) {
 func (AuthController *AuthController) SignUp(c *gin.Context) {
 	var input DTO.UserDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -93,6 +97,7 @@ func (AuthController *AuthController) SignUp(c *gin.Context) {
 	}
 	err = saveSession(c, userID)
 	if err != nil {
+		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session token"})
 		return
 	}
@@ -110,6 +115,7 @@ func (AuthController *AuthController) LogOut(c *gin.Context) {
 	)
 	err := session.Save()
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully Logged Out"})

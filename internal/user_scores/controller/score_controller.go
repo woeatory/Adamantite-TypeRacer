@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/models/DTO"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/service"
+	"log"
 	"net/http"
 )
 
@@ -19,12 +20,14 @@ func NewScoreController(service service.ScoreRecorder) *ScoreController {
 func (scoreController *ScoreController) AddNewScoreRecord(c *gin.Context) {
 	var input DTO.NewScoreRecordDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
+		log.Println("error getting user_id")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user_id"})
 		return
 	}
@@ -40,6 +43,7 @@ func (scoreController *ScoreController) GetAllUsersRecords(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
+		log.Println("error getting user_id")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user_id"})
 		return
 	}
@@ -54,12 +58,14 @@ func (scoreController *ScoreController) GetAllUsersRecords(c *gin.Context) {
 func (scoreController *ScoreController) DeleteScoreRecord(c *gin.Context) {
 	var input DTO.DeleteScoreRecord
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
+		log.Println("error getting user_id")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user_id"})
 		return
 	}

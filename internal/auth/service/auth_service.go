@@ -26,17 +26,21 @@ func (authService *AuthService) LogIn(dto DTO.UserDTO) (string, error) {
 	query := "SELECT user_id, password_hash FROM users WHERE username = $1"
 	stmt, err := authService.repo.DB.Prepare(query)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
+
 	defer stmt.Close()
 	var userID string
 	var hash string
 	err = stmt.QueryRow(dto.Username).Scan(&userID, &hash)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(dto.Password))
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 	return userID, nil

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/repository"
 	"github.com/woeatory/Adamantite-TypeRacer/internal/user_scores/models"
+	"log"
 )
 
 type ScoreRecorder interface {
@@ -24,10 +25,12 @@ func (scoreService *ScoreService) NewScoreRecord(userID string, wpm, accuracy, t
 	query := "INSERT INTO scores (user_id, WPM, accuracy, typos) VALUES ($1, $2, $3, $4)"
 	stmt, err := scoreService.repo.DB.Prepare(query)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	_, err = stmt.Exec(userID, wpm, accuracy, typos)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil
@@ -37,11 +40,13 @@ func (scoreService *ScoreService) GetAllUsersScoreRecords(userID string) ([]mode
 	query := "SELECT * FROM scores WHERE user_id = $1"
 	stmt, err := scoreService.repo.DB.Prepare(query)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	var records []models.ScoreRecord
 	rows, err := stmt.Query(userID)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	for rows.Next() {
@@ -49,6 +54,7 @@ func (scoreService *ScoreService) GetAllUsersScoreRecords(userID string) ([]mode
 		if err := rows.Scan(
 			&record.RecordID, &record.UserID, &record.WPM, &record.Accuracy, &record.Typos, &record.CreatedAt,
 		); err != nil {
+			log.Println(err)
 			return nil, err
 		}
 		records = append(records, record)
@@ -60,17 +66,21 @@ func (scoreService *ScoreService) DeleteScoreRecord(userID string, recordID int)
 	query := "DELETE FROM scores WHERE record_id = $1 AND user_id = $2"
 	stmt, err := scoreService.repo.DB.Prepare(query)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	result, err := stmt.Exec(recordID, userID)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	if rowsAffected == 0 {
+		log.Println("nothing was deleted")
 		return errors.New("nothing was deleted")
 	}
 	return nil

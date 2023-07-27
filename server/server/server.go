@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -82,7 +83,7 @@ func SetUpAndBoot() {
 	{
 		authGroup.POST(AuthLogin, authController.LogIn)
 		authGroup.POST(AuthSignUp, authController.SignUp)
-		authGroup.POST(AuthLogOut, authController.SignOut)
+		authGroup.POST(AuthLogOut, authController.LogOut)
 	}
 
 	scoreGroup := router.Group(ScoreGroupPath)
@@ -127,5 +128,11 @@ func SetUpAndBoot() {
 }
 
 func SetUpRouter() *gin.Engine {
-	return gin.Default()
+	// Logging into file and console
+	gin.DisableConsoleColor()
+	f, _ := os.Create("gin.log")
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+
+	router := gin.Default()
+	return router
 }

@@ -19,13 +19,13 @@ func NewUserController(userService service.UserServiceInterface) *UserController
 	}
 }
 
-func (userController *UserController) GetAllUsers(ctx *gin.Context) {
+func (userController *UserController) GetAllUsers(c *gin.Context) {
 	users, err := userController.userService.GetAll()
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": users})
+	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
 func (userController *UserController) GetUserByID(c *gin.Context) {
@@ -40,12 +40,14 @@ func (userController *UserController) GetUserByID(c *gin.Context) {
 func (userController *UserController) ChangeUsername(c *gin.Context) {
 	var input DTO.UserChangeUsernameDto
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
+		log.Println("Error getting user_id")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting user_id"})
 		return
 	}
@@ -68,6 +70,7 @@ func (userController *UserController) DeleteUser(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 	if userID == nil {
+		log.Println("error getting user_id")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error getting user_id"})
 		return
 	}
@@ -86,6 +89,7 @@ func (userController *UserController) DeleteUser(c *gin.Context) {
 	)
 	err = session.Save()
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully Deleted User"})
